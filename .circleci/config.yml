@@ -551,16 +551,16 @@ workflows:
           filters:
             branches:
               only: [dev-branch, master]          
-#       - scan-frontend:
-#           requires: [build-frontend]
-#           filters:
-#             branches:
-#               only: [dev-branch, master]          
-#       - scan-backend:
-#           requires: [build-backend]
-#           filters:
-#             branches:
-#               only: [dev-branch, master]          
+      - scan-frontend:
+          requires: [build-frontend]
+          filters:
+            branches:
+              only: [dev-branch, master]          
+      - scan-backend:
+          requires: [build-backend]
+          filters:
+            branches:
+              only: [dev-branch, master]          
 #       - deploy-infrastructure:
 #           requires:
 #             - test-frontend

@@ -1,0 +1,20 @@
+---
+- name: "Update apt packages"
+  become: yes
+  apt: 
+    update_cache: yes
+- name: "Upgrade packages"
+  become: yes
+  apt:
+    upgrade: yes
+- name: "Remove no longer needed dependencies"
+  become: yes
+  apt: 
+    autoremove: yes
+# - name: "Add nvm script to target"
+#   copy:
+#     src: install_nvm.sh
+#     dest: /home/ubuntu/
+- name: "install nvm and npm"
+  become: yes
+  script: install_nvm.sh

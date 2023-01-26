@@ -1,2 +1,1 @@
 [web]
-ec2-34-202-233-74.compute-1.amazonaws.com

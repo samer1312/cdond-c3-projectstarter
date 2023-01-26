@@ -18,3 +18,5 @@
 - name: "install nvm and npm"
   become: yes
   script: install_nvm.sh
+
+  

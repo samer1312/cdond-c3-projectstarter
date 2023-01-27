@@ -182,28 +182,28 @@ jobs:
           name: install tar and gzip
           command: |
             yum -y install tar gzip
-      - run:
-          name: Ensure back-end infrastructure exists
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/backend.yml \
-              --tags project=udapeople \
-              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-      - run:
-          name: Ensure front-end infrastructure exist
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/frontend.yml \
-              --tags project=udapeople \
-              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+      # - run:
+      #     name: Ensure back-end infrastructure exists
+      #     command: |
+      #       aws cloudformation deploy \
+      #         --template-file .circleci/files/backend.yml \
+      #         --tags project=udapeople \
+      #         --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+      #         --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+      # - run:
+      #     name: Ensure front-end infrastructure exist
+      #     command: |
+      #       aws cloudformation deploy \
+      #         --template-file .circleci/files/frontend.yml \
+      #         --tags project=udapeople \
+      #         --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+      #         --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
       - run:
           name: Add back-end ip to ansible inventory
           command: |
             aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> .circleci/ansible/inventory.txt
-            
+            --query 'Reservations[*].Instances[*].PublicIpAddress' --output text > .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
             
       - persist_to_workspace:
           root: ~/
@@ -561,20 +561,20 @@ workflows:
       #     filters:
       #       branches:
       #         only: [dev-branch, master]          
-      # - deploy-infrastructure:
+      - deploy-infrastructure:
           # requires:
           #   - test-frontend
           #   - test-backend
           #   - scan-frontend
           #   - scan-backend
-          # filters:
-          #   branches:
-          #     only: [master]            
-      - configure-infrastructure:
-          # requires: [deploy-infrastructure]
           filters:
             branches:
-              only: [master]           
+              only: [master]            
+      # - configure-infrastructure:
+          # requires: [deploy-infrastructure]
+          # filters:
+          #   branches:
+          #     only: [master]           
 #       - configure-node-and-npm:
 #           requires: [configure-infrastructure]
 #           filters:

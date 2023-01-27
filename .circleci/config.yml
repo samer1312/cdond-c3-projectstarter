@@ -236,7 +236,7 @@ jobs:
           name: Configure server
           command: |
             cd .circleci/ansible
-            ansible-playbook -i ~/project/.circleci/ansible/inventory.txt configure-server.yml
+            ansible-playbook -i ~/inventory.txt configure-server.yml
       # - destroy-environment:
       #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
@@ -562,20 +562,20 @@ workflows:
       #     filters:
       #       branches:
       #         only: [dev-branch, master]          
-      - deploy-infrastructure:
+      # - deploy-infrastructure:
           # requires:
           #   - test-frontend
           #   - test-backend
           #   - scan-frontend
           #   - scan-backend
-          filters:
-            branches:
-              only: [master]            
-      # - configure-infrastructure:
-          # requires: [deploy-infrastructure]
           # filters:
           #   branches:
-          #     only: [master]           
+          #     only: [master]            
+      - configure-infrastructure:
+          # requires: [deploy-infrastructure]
+          filters:
+            branches:
+              only: [master]           
 #       - configure-node-and-npm:
 #           requires: [configure-infrastructure]
 #           filters:

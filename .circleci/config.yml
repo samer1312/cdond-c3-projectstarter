@@ -530,9 +530,9 @@ jobs:
       #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"  , 123              
     
                   
-# workflows:
-#   default:
-#     jobs:
+workflows:
+  default:
+    jobs:
       # - build-frontend:
       #     filters:
       #       branches:
@@ -570,11 +570,11 @@ jobs:
           # filters:
           #   branches:
           #     only: [master]            
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
-      #     filters:
-      #       branches:
-      #         only: [master]           
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+          filters:
+            branches:
+              only: [master]           
 #       - configure-node-and-npm:
 #           requires: [configure-infrastructure]
 #           filters:

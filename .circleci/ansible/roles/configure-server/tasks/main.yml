@@ -1,22 +1,36 @@
 ---
-- name: "Update apt packages"
+- name: "update apt packages."
   become: yes
-  apt: 
+  apt:
     update_cache: yes
-- name: "Upgrade packages"
+
+- name: "upgrade packages"
   become: yes
   apt:
     upgrade: yes
-- name: "Remove no longer needed dependencies"
+
+
+- name: remove dependencies that are no longer required
   become: yes
-  apt: 
+  apt:
     autoremove: yes
-# - name: "Add nvm script to target"
-#   copy:
-#     src: install_nvm.sh
-#     dest: /home/ubuntu/
-- name: "install nvm and npm"
+
+- name: "install dependencies."
   become: yes
-  script: install_nvm.sh
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
+
+- name: "install pm2"
+  become: yes
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+
+
+
 
   

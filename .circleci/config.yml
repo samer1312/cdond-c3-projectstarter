@@ -202,8 +202,10 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
+            echo [all] > ~/inventory.txt
             aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' --output text > ~/inventory.txt
+            --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> ~/inventory.txt
+            
             cat ~/inventory.txt
             
       - persist_to_workspace:
@@ -562,20 +564,20 @@ workflows:
       #     filters:
       #       branches:
       #         only: [dev-branch, master]          
-      # - deploy-infrastructure:
+      - deploy-infrastructure:
           # requires:
           #   - test-frontend
           #   - test-backend
           #   - scan-frontend
           #   - scan-backend
-          # filters:
-          #   branches:
-          #     only: [master]            
-      - configure-infrastructure:
-          # requires: [deploy-infrastructure]
           filters:
             branches:
-              only: [master]           
+              only: [master]            
+      # - configure-infrastructure:
+          # requires: [deploy-infrastructure]
+          # filters:
+          #   branches:
+          #     only: [master]           
 #       - configure-node-and-npm:
 #           requires: [configure-infrastructure]
 #           filters:

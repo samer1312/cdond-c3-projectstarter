@@ -530,46 +530,46 @@ jobs:
       #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"  , 123              
     
                   
-# workflows:
-#   default:
-#     jobs:
-#       - build-frontend:
-#           filters:
-#             branches:
-#               only: [dev-branch, master]
-#       - build-backend:
-#           filters:
-#             branches:
-#               only: [dev-branch, master]      
-#       - test-frontend:
-#           requires: [build-frontend]
-#           filters:
-#             branches:
-#               only: [dev-branch, master]          
-#       - test-backend:
-#           requires: [build-backend]
-#           filters:
-#             branches:
-#               only: [dev-branch, master]          
-#       - scan-frontend:
-#           requires: [build-frontend]
-#           filters:
-#             branches:
-#               only: [dev-branch, master]          
-#       - scan-backend:
-#           requires: [build-backend]
-#           filters:
-#             branches:
-#               only: [dev-branch, master]          
-      # - deploy-infrastructure:
-      #     requires:
-      #       - test-frontend
-      #       - test-backend
-      #       - scan-frontend
-      #       - scan-backend
-      #     filters:
-      #       branches:
-      #         only: [master]            
+workflows:
+  default:
+    jobs:
+      - build-frontend:
+          filters:
+            branches:
+              only: [dev-branch, master]
+      - build-backend:
+          filters:
+            branches:
+              only: [dev-branch, master]      
+      - test-frontend:
+          requires: [build-frontend]
+          filters:
+            branches:
+              only: [dev-branch, master]          
+      - test-backend:
+          requires: [build-backend]
+          filters:
+            branches:
+              only: [dev-branch, master]          
+      - scan-frontend:
+          requires: [build-frontend]
+          filters:
+            branches:
+              only: [dev-branch, master]          
+      - scan-backend:
+          requires: [build-backend]
+          filters:
+            branches:
+              only: [dev-branch, master]          
+      - deploy-infrastructure:
+          requires:
+            - test-frontend
+            - test-backend
+            - scan-frontend
+            - scan-backend
+          filters:
+            branches:
+              only: [master]            
       # - configure-infrastructure:
       #     requires: [deploy-infrastructure]
       #     filters:

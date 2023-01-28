@@ -182,36 +182,36 @@ jobs:
           name: install tar and gzip
           command: |
             yum -y install tar gzip
-      # - run:
-      #     name: Ensure back-end infrastructure exists
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file .circleci/files/backend.yml \
-      #         --tags project=udapeople \
-      #         --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-      #         --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-      # - run:
-      #     name: Ensure front-end infrastructure exist
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file .circleci/files/frontend.yml \
-      #         --tags project=udapeople \
-      #         --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-      #         --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-      #hello
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --tags project=udapeople \
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --tags project=udapeople \
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            echo [all] > .circleci/ansible/inventory.txt
+            echo [web] > ~/inventory.txt
             aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> .circleci/ansible/inventory.txt
+            --query 'Reservations[*].Instances[*].PublicIpAddress' --output text >> ~/inventory.txt
             
-            cat .circleci/ansible/inventory.txt
             
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - .circleci/ansible/inventory.txt
+            
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - inventory.txt
       # - destroy-environment:
       #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
@@ -224,8 +224,8 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["bf:b1:29:b6:e8:c7:4c:97:f7:b6:7f:d9:1e:92:65:98"]
       
-      # - attach_workspace:
-      #     at: ~/      
+      - attach_workspace:
+          at: ~/      
       
       - run:
           name: Install dependencies
@@ -262,7 +262,7 @@ jobs:
           name: Install node and npm using nvm
           command: |
             cd .circleci/ansible
-            ansible-playbook -i inventory.txt install-using-nvm.yml
+            ansible-playbook -i ~/inventory.txt install-using-nvm.yml
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
 

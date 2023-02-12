@@ -273,12 +273,12 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update tar gzip 
-            apk add --update nodejs npm     
-            pip3 install awscli 
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+      #       apk add --update tar gzip 
+      #       apk add --update nodejs npm     
+      #       pip3 install awscli 
       - run:
           name: Run migrations
           command: |

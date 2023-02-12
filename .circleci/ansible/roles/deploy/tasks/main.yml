@@ -11,11 +11,12 @@
 - name: "change directory to backend directory"
   shell: |
     cd /home/ubuntu/backend
-    npm install
-    npm audit fix 
-    pm2 stop default
+    # npm install
+    # npm audit fix 
+    # pm2 stop default
+    pm2 delete all
     pm2 start npm -- start
-    cd dist
-    pm2 start main.js --update-env
+    # cd dist
+    # pm2 start main.js --update-env
 # - name: "Start the backend app"
 #   script: start_app.sh        

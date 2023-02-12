@@ -238,37 +238,37 @@ jobs:
           name: Configure server
           command: |
             cd .circleci/ansible
-            ansible-playbook -i inventory.txt configure-server.yml
+            ansible-playbook -i ~/inventory.txt configure-server.yml
       # - destroy-environment:
       #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
-  configure-node-and-npm:
-    docker:
-      - image: python:3.7-alpine3.11
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: ["bf:b1:29:b6:e8:c7:4c:97:f7:b6:7f:d9:1e:92:65:98"]
+  # configure-node-and-npm:
+  #   docker:
+  #     - image: python:3.7-alpine3.11
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         fingerprints: ["bf:b1:29:b6:e8:c7:4c:97:f7:b6:7f:d9:1e:92:65:98"]
       
-      - attach_workspace:
-          at: ~/      
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update ansible
-            pip3 install awscli
-            aws --version      
-      - run:
-          name: Install node and npm using nvm
-          command: |
-            cd .circleci/ansible
-            ansible-playbook -i ~/inventory.txt install-using-nvm.yml
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+  #     - attach_workspace:
+  #         at: ~/      
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           apk add --update ansible
+  #           pip3 install awscli
+  #           aws --version      
+  #     - run:
+  #         name: Install node and npm using nvm
+  #         command: |
+  #           cd .circleci/ansible
+  #           ansible-playbook -i ~/inventory.txt install-using-nvm.yml
+  #     - destroy-environment:
+  #         workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
 
   run-migrations:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - restore_cache:
@@ -283,29 +283,40 @@ jobs:
           name: Run migrations
           command: |
             cd backend
-            npm install
-            npm audit fix
+            # npm install
+            # npm audit fix
             npm run migrations > migrations_dump.txt
+            cat migrations_dump.txt
       - run:
-          name: Save Migration result to ENV variable
-          command: |
-            echo $(cat backend/migration_status.txt)
-            echo '1' > backend/migration_status.txt
-            echo $(cat backend/migration_status.txt)
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/backend/migration_status.txt
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-      - revert-migrations:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
-          current_value: $(cat backend/migration_status.txt)
+          name: Send migration status to kvdb.io OR memstash.io
+          command: |   
+              if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+              then
+                  # If you are using memstash.io, generate the token "7933fe63-4687-4fa1-8426-aa25aa1730ec" on the website
+                  # curl -H "Content-Type: text/plain" -H "token: 7933fe63-4687-4fa1-8426-aa25aa1730ec" --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+                  # If you are using kvdb.io, generate the bucket ID "DnvQZ5njzEz9kcs8AU4tvi" in your local terminal first
+                  curl https://kvdb.io/DnvQZ5njzEz9kcs8AU4tvi/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+              fi
+              # - run:
+      #     name: Save Migration result to ENV variable
+      #     command: |
+      #       echo $(cat backend/migration_status.txt)
+      #       echo '1' > backend/migration_status.txt
+      #       echo $(cat backend/migration_status.txt)
+      # - persist_to_workspace:
+      #     root: ~/
+      #     paths:
+      #       - project/backend/migration_status.txt
+      # - destroy-environment:
+      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      # - revert-migrations:
+      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      #     current_value: $(cat backend/migration_status.txt)
 
 
   deploy-frontend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: python:3.7-alpine3.16
     steps:
       - checkout
       - attach_workspace:
@@ -320,9 +331,9 @@ jobs:
           name: Get backend url
           command: |
             cd .circleci/ansible
-            export BACKEND_IP=$(cat inventory.txt |grep -v "[web]")
+            export BACKEND_IP=$(cat ~/inventory.txt |grep -v "[web]")
             echo ${BACKEND_IP}
-            echo $PWD
+            # echo $PWD
             export API_URL="http://${BACKEND_IP}:3030"
             cd ../..
             echo $PWD
@@ -336,23 +347,23 @@ jobs:
             cd frontend
             npm install
             npm run build
-            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            # tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
            
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      # - destroy-environment:
+      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
   
-      - revert-migrations: 
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-          current_value: $(cat backend/migration_status.txt)  
+      # - revert-migrations: 
+      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      #     current_value: $(cat backend/migration_status.txt)  
 
   deploy-backend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: python:3.9-alpine3.16
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["d2:b4:ba:2f:6b:fe:a2:87:fe:6d:80:f0:f7:ea:c0:cc"]      
+          fingerprints: ["bf:b1:29:b6:e8:c7:4c:97:f7:b6:7f:d9:1e:92:65:98"]      
       - attach_workspace:
           at: ~/
       - run:
@@ -379,7 +390,7 @@ jobs:
             cd backend
             npm i
             npm run build
-            cp package* ./dist
+            # cp package* ./dist
             cd ..
             # Zip the directory
             tar -C backend -czf artifact.tar.gz .
@@ -388,18 +399,18 @@ jobs:
           name: Deploy backend part2
           command: |                       
             cd /root/project/.circleci/ansible
-            echo "Contents  of the inventory.txt file is $(cat inventory.txt |grep -v "web")"
-            export BACKEND_IP=$(cat inventory.txt |grep -v "web")
+            echo "Contents  of the inventory.txt file is $(cat ~/inventory.txt |grep -v "web")"
+            export BACKEND_IP=$(cat ~/inventory.txt |grep -v "web")
             cat inventory.txt
-            ansible-playbook -i inventory.txt deploy-backend.yml
-            ansible-playbook -i inventory.txt prometheus-node-exporter.yml
+            ansible-playbook -i ~/inventory.txt deploy-backend.yml
+            # ansible-playbook -i inventory.txt prometheus-node-exporter.yml
         
-      - destroy-environment:
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      # - destroy-environment:
+      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
   
-      - revert-migrations: 
-          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"   
-          current_value: $(cat backend/migration_status.txt)          
+      # - revert-migrations: 
+      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"   
+      #     current_value: $(cat backend/migration_status.txt)          
 
   smoke-test:
     docker:
@@ -583,21 +594,21 @@ workflows:
 #           filters:
 #             branches:
 #               only: [master]           
-#       - run-migrations:
-#           requires: [configure-node-and-npm]
-#           filters:
-#             branches:
-#               only: [master]             
-#       - deploy-frontend:
-#           requires: [run-migrations]    
-#           filters:
-#             branches:
-#               only: [master]           
-#       - deploy-backend:
-#           requires: [run-migrations]    
-#           filters:
-#             branches:
-#               only: [master]           
+      - run-migrations:
+          requires: [configure-infrastructure]
+          filters:
+            branches:
+              only: [master]             
+      - deploy-frontend:
+          requires: [run-migrations]    
+          filters:
+            branches:
+              only: [master]           
+      - deploy-backend:
+          requires: [run-migrations]    
+          filters:
+            branches:
+              only: [master]           
 #       - smoke-test:
 #           requires: [deploy-backend, deploy-frontend]
 #           filters:

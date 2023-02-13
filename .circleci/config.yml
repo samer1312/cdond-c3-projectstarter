@@ -228,30 +228,6 @@ jobs:
       # - destroy-environment:
       #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
-  # configure-node-and-npm:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints: ["bf:b1:29:b6:e8:c7:4c:97:f7:b6:7f:d9:1e:92:65:98"]
-      
-  #     - attach_workspace:
-  #         at: ~/      
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update ansible
-  #           pip3 install awscli
-  #           aws --version      
-  #     - run:
-  #         name: Install node and npm using nvm
-  #         command: |
-  #           cd .circleci/ansible
-  #           ansible-playbook -i ~/inventory.txt install-using-nvm.yml
-  #     - destroy-environment:
-  #         workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
-
   run-migrations:
     docker:
       - image: circleci/node:13.8.0
@@ -259,12 +235,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-      # - run:
-      #     name: Install dependencies
-      #     command: |
-      #       apk add --update tar gzip 
-      #       apk add --update nodejs npm     
-      #       pip3 install awscli 
+
       - run:
           name: Run migrations
           command: |
@@ -283,21 +254,6 @@ jobs:
                   # If you are using kvdb.io, generate the bucket ID "DnvQZ5njzEz9kcs8AU4tvi" in your local terminal first
                   curl --insecure https://kvdb.io/DnvQZ5njzEz9kcs8AU4tvi/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
               fi
-              # - run:
-      #     name: Save Migration result to ENV variable
-      #     command: |
-      #       echo $(cat backend/migration_status.txt)
-      #       echo '1' > backend/migration_status.txt
-      #       echo $(cat backend/migration_status.txt)
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - project/backend/migration_status.txt
-      # - destroy-environment:
-      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-      # - revert-migrations:
-      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
-      #     current_value: $(cat backend/migration_status.txt)
 
 
   deploy-frontend:

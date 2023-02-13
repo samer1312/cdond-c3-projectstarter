@@ -1,17 +1,13 @@
 ---
-- name: "Create backend directory"
-  file:
-    path: /home/ubuntu/backend_app
-    state: directory
 
 - name: "unarchive backend"
   unarchive:
     src:   ~/project/artifact.tar.gz
-    dest:  /home/ubuntu/backend_app
+    dest:  /home/ubuntu/
 
 - name: "start pm2 "
   shell: |
-    cd /home/ubuntu/backend_app
+    cd /home/ubuntu/
     pm2 delete all
     pm2 start npm -- start
 

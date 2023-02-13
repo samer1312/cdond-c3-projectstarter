@@ -2,18 +2,7 @@ version: 2.1
 orbs:
   slack: circleci/slack@4.1
 
-commands:
-  get-backend-url:
-    description: Get the IP of backend 
-    steps:
-      - run:
-          name: Get backend url
-          command: |
-            echo 'export BACKEND_IP=$(aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-            --output text)' >> $BASH_ENV
-            
+commands:            
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -25,25 +14,22 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            echo  Destroy environments << parameters.workflow_id >> 
-            aws s3 rm s3://udapeople-<< parameters.workflow_id >> --recursive
-            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.workflow_id >>
-            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow_id >>
+            echo  "Destroy environments: ${CIRCLE_WORKFLOW_ID:0:7}"
+            aws s3 rm "s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --recursive
+            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
       workflow_id:
-        type: string 
-      current_value:
-        type: string    
+        type: string  
     steps:
-      - attach_workspace:
-          at: ~/
       - run:
           name: Revert migrations
           when: on_fail
           command: |
-            if(( $SUCCESS == << parameters.current_value >> )); 
+            SUCCESS=$(curl --insecure  https://kvdb.io/DnvQZ5njzEz9kcs8AU4tvi/migration_${CIRCLE_WORKFLOW_ID:0:7})
+            if(( $SUCCESS == 1 )); 
             then
              cd ~/project/backend
              npm install
@@ -439,7 +425,8 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"  
+            # URL="http://udapeople-3e8d1a4.s3-website-us-east-1.amazonaws.com/#/employees"          
             echo ${URL} 
             if curl -s ${URL} | grep "Welcome"
             then
@@ -448,12 +435,11 @@ jobs:
             else
               return 1
             fi
-      # - destroy-environment:
-      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
   
-      # - revert-migrations: 
-      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
-      #     current_value: $(cat backend/migration_status.txt)
+      - revert-migrations: 
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
 
   cloudfront-update:
     docker:

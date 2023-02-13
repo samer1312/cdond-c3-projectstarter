@@ -1,5 +1,0 @@
----
-- name: fix bashrc file
-  script: fix_it.sh
-- name: install node and npm using nvm
-  script: install_node.sh

@@ -1,22 +1,19 @@
 ---
 - name: "Create backend directory"
   file:
-    path: /home/ubuntu/backend
+    path: /home/ubuntu/backend_app
     state: directory
 
-- name: Push and extract artifact
+- name: "unarchive backend"
   unarchive:
-    src: ~/project/artifact.tar.gz
-    dest: /home/ubuntu/backend
-- name: "change directory to backend directory"
+    src:   ~/project/artifact.tar.gz
+    dest:  /home/ubuntu/backend_app
+
+- name: "start pm2 "
   shell: |
-    cd /home/ubuntu/backend
-    # npm install
-    # npm audit fix 
-    # pm2 stop default
+    cd /home/ubuntu/backend_app
     pm2 delete all
     pm2 start npm -- start
-    # cd dist
-    # pm2 start main.js --update-env
-# - name: "Start the backend app"
-#   script: start_app.sh        
+
+
+  

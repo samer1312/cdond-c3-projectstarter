@@ -519,7 +519,7 @@ workflows:
       #       branches:
       #         only: [master]             
       - deploy-frontend:
-          requires: [run-migrations]    
+          # requires: [run-migrations]    
           filters:
             branches:
               only: [master]           

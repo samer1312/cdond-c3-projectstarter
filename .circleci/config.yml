@@ -269,20 +269,20 @@ jobs:
             apk add --update ansible tar gzip 
             apk add --update nodejs npm     
             pip3 install awscli                
-      # - run:
-      #     name: Get backend url
-      #     command: |
-      #       cd .circleci/ansible
-      #       export BACKEND_IP=$(cat ~/inventory.txt |grep -v "[web]")
-      #       echo ${BACKEND_IP}
-      #       # echo $PWD
-      #       export API_URL="http://${BACKEND_IP}:3030"
-      #       cd ../..
-      #       echo $PWD
-      #       echo $API_URL
-      #       echo API_URL=$API_URL >> "frontend/.env"
-      #       echo ENVIRONMENT=production  >> "frontend/.env" 
-      #       echo NODE_ENV=production >> "frontend/.env"            
+      - run:
+          name: Get backend url
+          command: |
+            cd .circleci/ansible
+            export BACKEND_IP=$(cat ~/inventory.txt |grep -v "[web]")
+            echo ${BACKEND_IP}
+            # echo $PWD
+            export API_URL="http://${BACKEND_IP}:3030"
+            cd ../..
+            echo $PWD
+            echo $API_URL
+            echo API_URL=$API_URL >> "frontend/.env"
+            echo ENVIRONMENT=production  >> "frontend/.env" 
+            echo NODE_ENV=production >> "frontend/.env"            
       - run:
           name: Deploy frontend objects
           command: |
@@ -291,7 +291,7 @@ jobs:
             npm run build
             # tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             # aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-            aws s3 cp dist s3://udapeople-bdiuqwbfiu34rnlk --recursive
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
            
       # - destroy-environment:
       #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
@@ -498,48 +498,48 @@ workflows:
       #     filters:
       #       branches:
       #         only: [dev-branch, master]          
-      # - deploy-infrastructure:
+      - deploy-infrastructure:
           # requires:
           #   - test-frontend
           #   - test-backend
           #   - scan-frontend
           #   - scan-backend
-      #     filters:
-      #       branches:
-      #         only: [master]            
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
-      #     filters:
-      #       branches:
-      #         only: [master]           
-          
-      # - run-migrations:
-      #     requires: [configure-infrastructure]
-      #     filters:
-      #       branches:
-      #         only: [master]             
-      - deploy-frontend:
-          # requires: [run-migrations]    
+          filters:
+            branches:
+              only: [master]            
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
           filters:
             branches:
               only: [master]           
-      # - deploy-backend:
-      #     requires: [run-migrations]    
-      #     filters:
-      #       branches:
-      #         only: [master]           
-      # - smoke-test:
-      #     requires: [deploy-backend, deploy-frontend]
-      #     filters:
-      #       branches:
-      #         only: [master]           
+          
+      - run-migrations:
+          requires: [configure-infrastructure]
+          filters:
+            branches:
+              only: [master]             
+      - deploy-frontend:
+          requires: [run-migrations]    
+          filters:
+            branches:
+              only: [master]           
+      - deploy-backend:
+          requires: [run-migrations]    
+          filters:
+            branches:
+              only: [master]           
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
+          filters:
+            branches:
+              only: [master]           
       # - cloudfront-update:
       #     requires: [smoke-test]
       #     filters:
       #       branches:
       #         only: [master]           
-      - cleanup:
-          requires: [deploy-frontend]          
-          filters:
-            branches:
-              only: [master]   
+      # - cleanup:
+      #     requires: [cloudfront-update]          
+      #     filters:
+      #       branches:
+      #         only: [master]   

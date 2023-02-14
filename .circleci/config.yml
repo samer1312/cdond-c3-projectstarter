@@ -539,7 +539,7 @@ workflows:
       #       branches:
       #         only: [master]           
       - cleanup:
-          # requires: [cloudfront-update]          
+          requires: [deploy-frontend]          
           filters:
             branches:
               only: [master]   
